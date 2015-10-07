@@ -5,14 +5,16 @@
 #include <sstream>
 #include <gmp.h>
 
-std::string removeTrailingZeros(const char *in) {
-    std::string x(in);
-    //@todo: std::string, remove 0 only after '.'
-    return x.erase(x.find_last_not_of('0') + 1, std::string::npos);
+std::string removeTrailingZeros(std::string &x) {
+    x.erase(x.find_last_not_of('0') + 1, std::string::npos);
+    if ('.' == (*x.rbegin())) {
+        x.erase(x.size() - 1);
+    }
+    return x;
 }
 
 int main(int argc, char *argv[]) {
-    unsigned long int n = 0, d, rem;
+    unsigned long int n = 0, d;
     mpz_t acc, acc2, tmp, multiplicand, quotient;
     std::string x;
     std::stringstream convert;
@@ -41,41 +43,38 @@ int main(int argc, char *argv[]) {
     mpz_tdiv_q_ui(quotient, tmp, n);
     char *result = mpz_get_str(NULL, 10, quotient);
     x = std::string(result);
-    x.insert(x.length() - 1 - d, 1, '.');
-    x = removeTrailingZeros(x.c_str());
-    if ('.' == (*x.rbegin())) {
-        x.pop_back();
-    }
-    //mpz_mul_ui(tmp, multiplicand, rem);
-    //mpz_tdiv_q_ui(tmp, tmp, n);
 
-    std::cout << x;
-    //if (0 != mpz_sgn(tmp)) {
-    //    std::cout << "." << removeTrailingZeros(mpz_get_str(NULL, 10, tmp));
-    //}
-    std::cout << std::endl;
+    if (x.length() <= d) {
+        x.insert(0, d - x.length() + 1, '0');
+    }
+    x.insert(x.length() - d, 1, '.');
+    removeTrailingZeros(x);
+
+    std::cout << x << std::endl;
 
     // 2) variance
     mpz_mul(acc, acc, acc);
     mpz_mul_ui(acc2, acc2, n);
     mpz_sub(acc2, acc2, acc);
+    mpz_mul(acc2, multiplicand, acc2);
 
     mpz_set_ui(acc, n);
     mpz_mul(acc, acc, acc); //n^2
 
-    mpz_tdiv_qr(acc2, tmp, acc2, acc);  // [S(x^2)*n - (S(x))^2] / n^2
+    mpz_tdiv_q(acc2, acc2, acc);  // [S(x^2)*n - (S(x))^2] / n^2
     result = mpz_get_str(NULL, 10, acc2);
-    mpz_mul(tmp, multiplicand, tmp);
-    mpz_tdiv_q(tmp, tmp, acc);
+    x = std::string(result);
 
-    std::cout << result;
-    if (0 != mpz_sgn(tmp)) {
-        std::cout << "." << removeTrailingZeros(mpz_get_str(NULL, 10, tmp));
+    if (x.length() <= d) {
+        x.insert(0, d - x.length() + 1, '0');
     }
-    std::cout << std::endl;
+    x.insert(x.length() - d, 1, '.');
+    removeTrailingZeros(x);
 
-//    std::cout << "precision: " << d << std::endl;
-//    std::cout << "count no.: " << n << std::endl;
-//    std::cout << "acc2: " << acc2 << std::endl;
+    std::cout << x << std::endl;
+
+    // 3) period
+
+
     return 0;
 }

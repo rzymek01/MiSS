@@ -7,6 +7,7 @@
 
 std::string removeTrailingZeros(const char *in) {
     std::string x(in);
+    //@todo: std::string, remove 0 only after '.'
     return x.erase(x.find_last_not_of('0') + 1, std::string::npos);
 }
 
@@ -36,15 +37,22 @@ int main(int argc, char *argv[]) {
     mpz_pow_ui(multiplicand, multiplicand, d);
 
     // 1) mean
-    rem = mpz_tdiv_qr_ui(quotient, tmp, acc, n);
+    mpz_mul(tmp, acc, multiplicand);
+    mpz_tdiv_q_ui(quotient, tmp, n);
     char *result = mpz_get_str(NULL, 10, quotient);
-    mpz_mul_ui(tmp, multiplicand, rem);
-    mpz_tdiv_q_ui(tmp, tmp, n);
-
-    std::cout << result;
-    if (0 != mpz_sgn(tmp)) {
-        std::cout << "." << removeTrailingZeros(mpz_get_str(NULL, 10, tmp));
+    x = std::string(result);
+    x.insert(x.length() - 1 - d, 1, '.');
+    x = removeTrailingZeros(x.c_str());
+    if ('.' == (*x.rbegin())) {
+        x.pop_back();
     }
+    //mpz_mul_ui(tmp, multiplicand, rem);
+    //mpz_tdiv_q_ui(tmp, tmp, n);
+
+    std::cout << x;
+    //if (0 != mpz_sgn(tmp)) {
+    //    std::cout << "." << removeTrailingZeros(mpz_get_str(NULL, 10, tmp));
+    //}
     std::cout << std::endl;
 
     // 2) variance

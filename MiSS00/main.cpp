@@ -3,6 +3,8 @@
 //
 #include <iostream>
 #include <sstream>
+#include <vector>
+#include <map>
 #include <gmp.h>
 
 std::string removeTrailingZeros(std::string &x) {
@@ -19,6 +21,11 @@ int main(int argc, char *argv[]) {
     std::string x;
     std::stringstream convert;
 
+    typedef std::map<unsigned long int, unsigned long int>::iterator pos_map_it;
+    std::vector<std::string> sequence;
+    std::map<unsigned long int, unsigned long int> posMap;
+    unsigned long int period = 0;
+
     convert << argv[1];
     convert >> d;
 
@@ -33,7 +40,33 @@ int main(int argc, char *argv[]) {
         mpz_add(acc, acc, tmp);
         mpz_addmul(acc2, tmp, tmp);
         ++n;
+
+        // 3) period
+        sequence.push_back(x);
+
+//        for (pos_map_it it = posMap.begin(); it != posMap.end(); ) {
+//            if (x == sequence[it->second]) {
+//                it->second = (it->second + 1) % (it->first);
+//                it++;
+//            } else {
+//                posMap.erase(it++);
+//            }
+//        }
+//
+//        posMap[n] = 0;
     }
+
+//    //<debug>
+//    for (std::vector<std::string>::iterator it = sequence.begin(); it != sequence.end(); ++it) {
+//        std::cout << *it << " ";
+//    }
+//    std::cout << std::endl;
+//    //</debug>
+//    period = posMap.begin()->first;
+//
+//    std::vector<std::string>().swap(sequence);
+//    posMap.clear();
+    //
 
     mpz_init_set_ui(multiplicand, 10);
     mpz_pow_ui(multiplicand, multiplicand, d);
@@ -74,7 +107,32 @@ int main(int argc, char *argv[]) {
     std::cout << x << std::endl;
 
     // 3) period
+    unsigned long int length = n / 2, idx, pos;
+    for (period = 1; period <= length; ++period) {
+        for (pos = 0, idx = 0; pos < n; ++pos) {
+            if (sequence[pos] != sequence[idx]) {
+                break;
+            }
+            idx = (idx + 1) % period;
+        }
+        if (pos == n) {
+            break;
+        }
+    }
+    if (period == length + 1) {
+        period = n;
+    }
 
+    std::cout << period << std::endl;
+
+    // clean-up
+    mpz_clear(acc);
+    mpz_clear(acc2);
+    mpz_clear(tmp);
+    mpz_clear(multiplicand);
+    mpz_clear(quotient);
+
+    std::vector<std::string>().swap(sequence);
 
     return 0;
 }

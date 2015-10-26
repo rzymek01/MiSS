@@ -8,6 +8,15 @@
 #include <gmp.h>
 #include <gmpxx.h>
 
+struct Frac {
+    mpz_class up;
+    mpz_class down;
+
+    inline bool operator<(const Frac& other) {
+        return (this->up * other.down < this->down * other.up);
+    }
+};
+
 std::string removeTrailingZeros(std::string &x) {
     x.erase(x.find_last_not_of('0') + 1, std::string::npos);
     if ('.' == (*x.rbegin())) {
@@ -20,15 +29,20 @@ std::string gmpToString(mpz_class number) {
     return std::string(mpz_get_str(NULL, 10, number.get_mpz_t()));
 }
 
+mpz_class gmpDiv(mpz_class a, mpz_class b) {
+    mpz_class ret;
+    mpz_tdiv_q(ret.get_mpz_t(), a.get_mpz_t(), b.get_mpz_t());
+    return ret;
+}
+
 int main(int argc, char *argv[]) {
-    unsigned long int n = 0, d;
+    unsigned long int n, d;
     mpz_class acc, acc2, tmp, multiplicand, quotient;
     std::string x;
     std::stringstream convert;
 
     typedef std::map<unsigned long int, unsigned long int>::iterator pos_map_it;
-    std::vector<std::string> sequence;
-    std::map<unsigned long int, unsigned long int> posMap;
+    std::vector<Frac> sequence;
     unsigned long int period = 0;
 
     convert << argv[1];
@@ -40,86 +54,23 @@ int main(int argc, char *argv[]) {
     multiplicand = 0;
     quotient = 0;
 
-    while (std::cin >> x) {
-        //: acc += tmp //średnia
-        tmp = x;
-
-        acc += tmp;
-
-        //: acc2 += tmp*tmp  // wariancja do zpierwiastkowania
-        acc2 += tmp*tmp;
-
-        ++n;
-
-        // 3) period
-        sequence.push_back(x);
+    for (n = 0; std::cin >> x; n++) {
+        // prase fraction
+        size_t a = x.find('/');
+        Frac elem;
+        elem.up = x.substr(0, a);
+        elem.down = x.substr(a + 1, -1);
+        //put fraction into sequence
+        sequence.push_back(elem);
 
     }
 
 
-    multiplicand = 10;
-    mpz_pow_ui(multiplicand.get_mpz_t(), multiplicand.get_mpz_t(), d);
+    std::sort(sequence.begin(), sequence.end());
 
-    // 1) mean
-    tmp = acc*multiplicand;
+    for (std::vector<Frac>::iterator i = sequence.begin(); i != sequence.end(); ++i)
+        std::cout << gmpToString(i->up) << '/' << gmpToString(i->down) << " = " << gmpToString(gmpDiv(i->up * 10000, i->down)) << std::endl;
 
-    mpz_tdiv_q_ui(quotient.get_mpz_t(), tmp.get_mpz_t(), n);
-    x = gmpToString(quotient);
-
-
-    if (x.length() <= d) {
-        x.insert(0, d - x.length() + 1, '0');
-    }
-    x.insert(x.length() - d, 1, '.');
-    removeTrailingZeros(x);
-
-    std::cout << x << std::endl;
-
-    // 2) variance
-    
-    acc2 *= n;
-    acc2 -= acc*acc;
-
-    acc2 *= multiplicand;
-
-    acc = n*n;
-    
-
-
-    mpz_tdiv_q(acc2.get_mpz_t(), acc2.get_mpz_t(), acc.get_mpz_t()); // [S(x^2)*n - (S(x))^2] / n^2
-
-    x = gmpToString(acc2);
-
-    if (x.length() <= d) {
-        x.insert(0, d - x.length() + 1, '0');
-    }
-    x.insert(x.length() - d, 1, '.');
-    removeTrailingZeros(x);
-
-    std::cout << x << std::endl;
-
-    // 3) period
-    unsigned long int length = n / 2, idx, pos;
-    for (period = 1; period <= length; ++period) {
-        for (pos = 0, idx = 0; pos < n; ++pos) {
-            if (sequence[pos] != sequence[idx]) {
-                break;
-            }
-            idx = (idx + 1) % period;
-        }
-        if (pos == n) {
-            break;
-        }
-    }
-    if (period == length + 1) {
-        period = n;
-    }
-
-    std::cout << period << std::endl;
-
-    // clean-up
-
-    std::vector<std::string>().swap(sequence);
 
     return 0;
 }

@@ -17,6 +17,6 @@ cat wynik
 echo 
 echo Wzor
 cat $wzor
-
+echo DIFF
 diff wynik $wzor
 rm wynik

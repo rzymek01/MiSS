@@ -55,7 +55,7 @@ class Hi {
 public:
 
     Hi(/* sorted vec */ mpq_vec& seq, uli d)
-    : seq(seq), d(d), k(10), a(0), b(1), Y() {
+    : seq(seq), d(d), k(10), Y() {
     }
 
     void execute() {
@@ -67,7 +67,6 @@ private:
     mpq_vec& seq;
     uli d;
     int k;
-    int a, b;
     uli_vec Y;
 
     mpq_class getAi(int i) {
@@ -134,8 +133,8 @@ int main(int argc, char *argv[]) {
     std::sort(sequence.begin(), sequence.end());
 
     Hi hiExecutor(sequence, d);
-
     hiExecutor.execute();
+
     kolmogorov(sequence, d);
 
     return 0;

@@ -17,7 +17,7 @@
 char buf[100000];
 
 void print_mpq(mpq_class mpq, uli d) {
-    mpf_class mpq_f(mpq, 100000); // XXX unit of this precision is not clear, I assumed big one is enough
+    mpf_class mpq_f(mpq, 100000000); // XXX unit of this precision is not clear, I assumed big one is enough
     mpf_ptr mpq_fptr = mpq_f.get_mpf_t();
 
     int actualPrinted;
@@ -71,7 +71,7 @@ private:
     uli_vec Y;
 
     mpq_class getAi(int i) {
-        return (mpq_class) (i * i) / (mpq_class) 100;
+        return (mpq_class) i * (mpq_class) i / (mpq_class) 100;
     }
 
     mpq_class getPi(int i) {
@@ -81,20 +81,23 @@ private:
     void populateY() {
         Y.assign(k + 1, 0);
         //iterate over seq and count
-        uli currentI = 0;
+        uli currentI = 1;
         mpq_class bound = getAi(currentI);
         for (mpq_vec::iterator it = seq.begin(); it != seq.end(); ++it) {
             /* std::cout << *it; ... */
             double _it = it->get_d();
             double _bound = bound.get_d();
-//            printf("OUTER it: %f bound: %f\n", _it, _bound);
-            while (*it > bound) {
+            //            printf("OUTER it: %f bound: %f\n", _it, _bound);
+            while (*it >= bound) {
                 currentI++;
                 bound = getAi(currentI);
                 _bound = bound.get_d();
-//                printf("INNER it: %f bound: %f\n", _it, _bound);
+                //                printf("INNER it: %f bound: %f\n", _it, _bound);
             }
-//            printf("element %f qualified into Y%d (<=%f)\n", _it, currentI, _bound);
+            if (currentI > k) {
+                break;
+            }
+            //            printf("element %f qualified into Y%d (<%f)\n", _it, currentI, _bound);
             Y[currentI]++;
         }
     }
@@ -103,9 +106,9 @@ private:
         mpq_class n = seq.size();
         mpq_class V = 0;
         for (int i = 1; i <= k; i++) {
-            mpq_class Pi = getPi(i);
-            mpq_class up = Y[i] - n*Pi;
-            V += (up * up) / (n * Pi);
+            mpq_class nPi = n * getPi(i);
+            mpq_class up = Y[i] - nPi;
+            V += (up * up) / nPi;
         }
         return V;
     }

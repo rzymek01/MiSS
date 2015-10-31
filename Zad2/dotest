@@ -1,0 +1,22 @@
+#!/bin/bash
+# 
+# File:   dotest.bash
+# Author: adam
+#
+# Created on 2015-10-31, 10:33:02
+#
+whichTest=$1
+prec=$2
+wzor=test/wzor${whichTest}
+
+
+./dist/Debug/GNU-Linux/zad2 $prec < test/test${whichTest} > wynik
+echo Precyzja $prec
+echo Wynik
+cat wynik
+echo 
+echo Wzor
+cat $wzor
+
+diff wynik $wzor
+rm wynik

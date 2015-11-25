@@ -21,9 +21,9 @@ class AWC:
         return self.values[self.k - self.j] + self.values[0] + self.carry
 
     def get_next(self):
-        if self.current < self.k:
-            self.current += 1
-            return self.initial[self.current - 1]
+        #if self.current < self.k:
+        #    self.current += 1
+        #    return self.initial[self.current - 1]
         inner_value = self.inner_value()
         self.carry = 1 if inner_value >= self.m else 0
         val = inner_value % self.m
@@ -31,13 +31,17 @@ class AWC:
         self.values.append(val)
         self.current += 1
         return val
-
-if __name__ == '__main__':
+        
+def run():
     if len(sys.argv) != 5:
         print('Need 4 arguments, number of samples, j, k and m')
-    _, n, j, k, m = sys.argv
-
-    initial = map(int, input().split())
+        return
+    n, j, k, m = map(int, sys.argv[1:])
+    initial = map(int, raw_input().split())
     generator = AWC(j, k, m, initial)
     for x in range(n):
         print(generator.get_next())
+
+
+if __name__ == '__main__':
+    run()

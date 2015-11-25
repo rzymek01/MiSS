@@ -22,9 +22,9 @@ class FibAdd:
         return self.values[self.k - self.j] + self.values[0]
 
     def get_next(self):
-        if self.current < self.k:
-            self.current += 1
-            return self.initial[self.current - 1]
+        #if self.current < self.k:
+        #    self.current += 1
+        #    return self.initial[self.current - 1]
 
         val = self.inner_value() % self.m
         self.values.popleft()
@@ -32,12 +32,17 @@ class FibAdd:
         self.current += 1
         return val
 
-if __name__ == '__main__':
+def run():
     if len(sys.argv) != 5:
         print('Need 4 arguments, number of samples, j, k and m')
-    _, n, j, k, m = sys.argv
+        return
+    n, j, k, m = map(int, sys.argv[1:])
 
-    initial = map(int, input().split())
+    initial = map(int, raw_input().split())
     generator = FibAdd(j, k, m, initial)
     for x in range(n):
         print(generator.get_next())
+
+if __name__ == '__main__':
+	run()
+    
